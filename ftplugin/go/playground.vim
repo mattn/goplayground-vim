@@ -1,21 +1,44 @@
-if exists("b:did_ftplugin")
-  finish
-endif
+function! s:open_browser(browser, url)
+  let cmd = substitute(a:browser, '%URL%', a:url, 'g')
+  if cmd =~ '^!'
+    silent! exec cmd
+  elseif cmd =~ '^:[A-Z]'
+    exec cmd
+  else
+    silent! call system(cmd)
+  endif
+endfunction
 
-function! s:playground()
+function! s:playground(bang)
   if !executable('curl')
     echoerr "install curl command"    
     return
   endif
   echon 'Compiling and running...'
-  let res = http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
-  let obj = json#decode(res.content)
-  if has_key(obj, 'compile_errors') && len(obj.compile_errors)
-    echohl WarningMsg | echo obj.compile_errors | echohl None
-  elseif has_key(obj, 'output')
-    echo obj.output
+  if a:bang =~ '^!'
+    let res = http#post('http://play.golang.org/share', join(getline(1, line('$')), "\n"))
+    let url = printf('http://play.golang.org/p/%s', res.content)
+    echo url
+    let browser = get(g:, 'goplayground_open_browser', '')
+    if len(browser) > 0
+      call s:open_browser(browser, url)
+    elseif has('unix') && !has('xterm_clipboard')
+      let @" = url
+    else
+      let @+ = url
+    endif
+  else
+    let res = http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
+    let obj = json#decode(res.content)
+    if has_key(obj, 'compile_errors') && len(obj.compile_errors)
+      echohl WarningMsg | echo obj.compile_errors | echohl None
+    elseif has_key(obj, 'output')
+      echo obj.output
+    endif
   endif
 endfunction
 
-command! -buffer Playground :call s:playground()
-nnoremap <buffer> <localleader>e :Playground<cr>
+if !exists("b:did_ftplugin")
+  command! -buffer -bang Playground :call s:playground("<bang>")
+  nnoremap <buffer> <localleader>e :Playground<cr>
+endif
