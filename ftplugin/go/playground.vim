@@ -8,8 +8,8 @@ function! s:playground()
     return
   endif
   echon 'Compiling and running...'
-  let res = http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
-  let obj = json#decode(res.content)
+  let res = webapi#http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
+  let obj = webapi#json#decode(res.content)
   if has_key(obj, 'compile_errors') && len(obj.compile_errors)
     echohl WarningMsg | echo obj.compile_errors | echohl None
   elseif has_key(obj, 'output')
