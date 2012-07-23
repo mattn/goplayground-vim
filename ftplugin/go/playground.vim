@@ -11,7 +11,7 @@ endfunction
 
 function! s:playground(bang)
   if !executable('curl')
-    echoerr "install curl command"    
+    echoerr "install curl command"
     return
   endif
   echon 'Compiling and running...'
