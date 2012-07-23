@@ -11,12 +11,12 @@ endfunction
 
 function! s:playground(bang)
   if !executable('curl')
-    echoerr "install curl command"    
+    echoerr "install curl command"
     return
   endif
   echon 'Compiling and running...'
   if a:bang =~ '^!'
-    let res = http#post('http://play.golang.org/share', join(getline(1, line('$')), "\n"))
+    let res = webapi#http#post('http://play.golang.org/share', join(getline(1, line('$')), "\n"))
     let url = printf('http://play.golang.org/p/%s', res.content)
     echo url
     let browser = get(g:, 'goplayground_open_browser', '')
@@ -28,8 +28,8 @@ function! s:playground(bang)
       let @+ = url
     endif
   else
-    let res = http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
-    let obj = json#decode(res.content)
+    let res = webapi#http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
+    let obj = webapi#json#decode(res.content)
     if has_key(obj, 'compile_errors') && len(obj.compile_errors)
       echohl WarningMsg | echo obj.compile_errors | echohl None
     elseif has_key(obj, 'output')
