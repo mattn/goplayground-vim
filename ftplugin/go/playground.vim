@@ -16,7 +16,8 @@ function! s:playground(bang)
   endif
   echon 'Compiling and running...'
   if a:bang =~ '^!'
-    let res = webapi#http#post('http://play.golang.org/share', join(getline(1, line('$')), "\n"))
+    let res = webapi#http#post('http://play.golang.org/share',
+    \ iconv(join(getline(1, line('$')), "\n"), &encoding, 'utf-8'))
     let url = printf('http://play.golang.org/p/%s', res.content)
     echo url
     let browser = get(g:, 'goplayground_open_browser', '')
