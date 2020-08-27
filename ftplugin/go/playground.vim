@@ -16,9 +16,9 @@ function! s:playground(bang)
   endif
   echon 'Compiling and running...'
   if a:bang =~ '^!'
-    let res = webapi#http#post('http://play.golang.org/share',
+    let res = webapi#http#post('https://play.golang.org/share',
     \ iconv(join(getline(1, line('$')), "\n"), &encoding, 'utf-8'))
-    let url = printf('http://play.golang.org/p/%s', res.content)
+    let url = printf('https://play.golang.org/p/%s', res.content)
     echo url
     let browser = get(g:, 'goplayground_open_browser', '')
     if len(browser) > 0
@@ -29,7 +29,7 @@ function! s:playground(bang)
       let @+ = url
     endif
   else
-    let res = webapi#http#post('http://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
+    let res = webapi#http#post('https://play.golang.org/compile', {"body": join(getline(1, line('$')), "\n")})
     let obj = webapi#json#decode(res.content)
     if has_key(obj, 'compile_errors') && len(obj.compile_errors)
       echohl WarningMsg | echo obj.compile_errors | echohl None
